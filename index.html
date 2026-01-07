@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Buy Ticket</title>
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.min.js"></script>
+</head>
+<body style="font-family: Arial; text-align: center; margin-top: 100px;">
+
+    <h1>Concert Ticket</h1>
+    <p>Price: 0.05 ETH</p>
+
+    <button onclick="buyTicket()" style="font-size: 20px; padding: 10px 20px;">
+        Buy Ticket
+    </button>
+
+    <p id="status"></p>
+
+<script>
+const contractAddress = "0x6FBE26C466D484a18Fc82C12b82C7d4C613ACaEB";
+const contractABI = [
+    {
+      "inputs": [
+        {
+          "internalType": "address payable",
+          "name": "_artist",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_price",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "buyer",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "artistShare",
+          "type": "uint256"
+        }
+      ],
+      "name": "TicketSold",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "artist",
+      "outputs": [
+        {
+          "internalType": "address payable",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "buyTicket",
+      "outputs": [],
+      "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "owner",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "ticketPrice",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "withdraw",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+];
+
+async function buyTicket() {
+    if (!window.ethereum) {
+        alert("Please install MetaMask");
+        return;
+    }
+
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    await provider.send("eth_requestAccounts", []);
+
+    const signer = provider.getSigner();
+    const contract = new ethers.Contract(contractAddress, contractABI, signer);
+
+    try {
+        document.getElementById("status").innerText = "Transaction pending...";
+
+        const tx = await contract.buyTicket({
+            value: ethers.utils.parseEther("0.05")
+        });
+
+        await tx.wait();
+
+        document.getElementById("status").innerText = "Ticket purchased successfully!";
+    } catch (error) {
+        document.getElementById("status").innerText = "Transaction failed.";
+        console.error(error);
+    }
+}
+</script>
+
+</body>
+</html>
